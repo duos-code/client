@@ -14,7 +14,7 @@ export class CommunicationService {
   }
 
   connectSocket() {
-    this.socket = io('http://localhost:3000');
+    this.socket = io('https://two3x-server.onrender.com');
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });
