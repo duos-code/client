@@ -1,51 +1,58 @@
 <div class="h-screen w-screen">
 
-  <div *ngIf="!inMeeting; else elseBlock" class="flex flex-row w-full h-full">
-    <div class="flex flex-col justify-center items-center w-4/12 h-full border-r-2 px-5">
+  <div *ngIf="!inMeeting; else elseBlock" class="flex flex-row justify-center w-full h-full">
 
-      <div class="pt-2.5 pb-2">Join meeting</div>
-      <div class="pt-2.5 pb-2">{{ roomId }}</div>
+    <div class="w-8/12 h-full flex flex-row justify-center items-center">
+      <div class=" w-full h-full relative">
+        <video #myVideoRef class="w-full h-full  object-cover" autoplay>
+        </video>
 
-      <div class="mb-3 w-full">
-        <input #nameBox type="search"
-          class="m-0 block w-full pt-2.5 pb-2 flex-auto text-center rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
-          placeholder="Enter your name" />
+        <div *ngIf="!isMyCameraOn" class="absolute bottom-0 right-0 w-full h-full  bg-black">
+          <div class="flex flex-row w-full h-full justify-center items-center text-white-10">
+            Camera is off
+          </div>
+        </div>
+
+        <div class="absolute bottom-0 right-0 pb-5 flex flex-row w-full justify-center items-center space-x-2">
+
+          <button (click)="handleCameraToggle()" type="button"
+            class="inline-block rounded-full border px-4 py-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out focus:outline-none focus:ring-0 active:bg-white-10">
+            📷
+          </button>
+
+          <button (click)="handleMicToggle()" type="button"
+            class="inline-block rounded-full border px-4 py-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out  focus:outline-none focus:ring-0 active:bg-white-10">
+            🔊
+          </button>
+
+        </div>
+
       </div>
 
-      <div class="mb-3 w-full">
-        <button (click)="handelJoinMeeting(nameBox)" type="button"
-          class="m-0 block w-full bg-blue px-6 pt-2.5 pb-2 rounded text-xs font-bold leading-normal text-primary-50 shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-blue hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]">
+    </div>
+
+
+    <div class="flex flex-col justify-center items-center w-4/12 h-full px-5 border-l border-white-20">
+
+      <div class="pt-2.5 pb-2 font-semibold text-white-40">Ready to join?</div>
+      <div class="pt-2.5 pb-2">{{ roomId }}</div>
+
+      <!-- <div class="mb-3 w-full">
+        <input #nameBox
+          class="m-0 block w-full pt-2.5 pb-2 flex-auto text-center rounded border border-solid border-gray-10 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
+          placeholder="Enter your name" />
+      </div> -->
+
+      <div class="mb-3">
+        <button (click)="handelJoinMeeting()" type="button"
+          class="inline-block rounded-full bg-blue-10 px-6 pt-2.5 pb-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
           Join meeting
         </button>
       </div>
 
-      <div class="flex flex-row space-x-1">
-
-        <button (click)="handleCameraToggle()" type="button"
-          class="rounded bg-neutral-800 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-neutral-50 shadow-[0_4px_9px_-4px_#332d2d] transition duration-150 ease-in-out hover:bg-neutral-800 hover:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] focus:bg-neutral-800 focus:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] focus:outline-none focus:ring-0 active:bg-neutral-900 active:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] dark:bg-neutral-900 dark:shadow-[0_4px_9px_-4px_#171717] dark:hover:bg-neutral-900 dark:hover:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)] dark:focus:bg-neutral-900 dark:focus:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)] dark:active:bg-neutral-900 dark:active:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)]">
-          Camera
-        </button>
-
-        <button (click)="handleMicToggle()" type="button"
-          class="rounded bg-neutral-800 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-neutral-50 shadow-[0_4px_9px_-4px_#332d2d] transition duration-150 ease-in-out hover:bg-neutral-800 hover:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] focus:bg-neutral-800 focus:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] focus:outline-none focus:ring-0 active:bg-neutral-900 active:shadow-[0_8px_9px_-4px_rgba(51,45,45,0.3),0_4px_18px_0_rgba(51,45,45,0.2)] dark:bg-neutral-900 dark:shadow-[0_4px_9px_-4px_#171717] dark:hover:bg-neutral-900 dark:hover:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)] dark:focus:bg-neutral-900 dark:focus:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)] dark:active:bg-neutral-900 dark:active:shadow-[0_8px_9px_-4px_rgba(27,27,27,0.3),0_4px_18px_0_rgba(27,27,27,0.2)]">
-          Mic
-        </button>
-
-      </div>
-
     </div>
 
-    <div class="w-8/12 bg-black">
-      <div class="w-full h-full relative ">
-        <video #myVideoRef class="w-full h-full object-none" autoplay>
-        </video>
-        <div *ngIf="!isMyCameraOn" class="absolute bottom-0 right-0 w-full h-full bg-black">
-          <div class="flex flex-row w-full h-full justify-center items-center">
-          </div>
-        </div>
-      </div>
 
-    </div>
   </div>
 
 
@@ -56,8 +63,8 @@
     <div class="flex flex-row w-full h-full">
 
 
-      <div class="w-9/12 h-full border-r border-border">
-        <app-code-editor value="code" [codeModel]="codeModel" (anyChangedEvent)="handleAnyChangedEvent($event)"/>
+      <div class="w-9/12 h-full  border-white-20 border-r-2">
+        <app-code-editor value="code" [codeModel]="codeModel" (anyChangedEvent)="handleAnyChangedEvent($event)" />
       </div>
 
       <div class="w-3/12">
@@ -71,6 +78,8 @@
           </video>
         </div>
       </div>
+
+      <button (click)="handleCameraToggle()">OFF</button>
 
 
     </div>

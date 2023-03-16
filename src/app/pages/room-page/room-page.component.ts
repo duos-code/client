@@ -23,11 +23,11 @@ export class RoomPageComponent {
   public inMeeting: boolean = false;
 
   public codeModel: Code = {
-    language: 'cpp',
     uri: 'main.c',
-    value: '{}',
+    value: '{s}',
     input: '',
     output: 'Click on RUN button to see the output',
+    editorOptions: { theme: 'vs-light', language: 'c' },
   };
 
   constructor(
@@ -43,6 +43,7 @@ export class RoomPageComponent {
 
     this.communication.socket.on('joined-room', ({ roomId }) => {
       this.router.navigate([`/${roomId}`]);
+      this.handleMyVideoStream();
     });
 
     this.communication.socket.on('join-room-error', ({ message }) => {
@@ -54,6 +55,7 @@ export class RoomPageComponent {
       console.log('joined-meeting');
       this.handlePeerAnswer();
       this.inMeeting = true;
+      this.handleMyVideoStream();
     });
 
     this.communication.socket.on('joined-meeting-call', ({ peerId }) => {
@@ -64,8 +66,10 @@ export class RoomPageComponent {
     });
 
     this.communication.socket.on('code-change', ({ code }) => {
-      if (this.codeModel.language != code.language) {
-        this.codeModel.language = code.language;
+      if (
+        this.codeModel.editorOptions.language != code.editorOptions.language
+      ) {
+        this.codeModel.editorOptions.language = code.editorOptions.language;
       }
 
       if (this.codeModel.input != code.input) {
@@ -76,8 +80,6 @@ export class RoomPageComponent {
         this.codeModel.value = code.value;
       }
     });
-
-    this.handleMyVideoStream();
   }
 
   handleMyVideoStream() {
@@ -120,9 +122,13 @@ export class RoomPageComponent {
     });
   }
 
-  handelJoinMeeting(nameBox: any) {
-    console.log(nameBox.value);
-    this.communication.joinMeeting(nameBox.value, this.roomId);
+  // handelJoinMeeting(nameBox: any) {
+  //   console.log(nameBox.value);
+  //   this.communication.joinMeeting(nameBox.value, this.roomId);
+  // }
+
+  handelJoinMeeting() {
+    this.communication.joinMeeting('My Name', this.roomId);
   }
 
   handlePeerCall(remotePeerId: string) {
@@ -178,7 +184,6 @@ export class RoomPageComponent {
   }
 
   handleAnyChangedEvent(code: any) {
-    console.log('code-change event emit');
     this.communication.socket.emit('code-change', {
       code: code,
       roomId: this.roomId,

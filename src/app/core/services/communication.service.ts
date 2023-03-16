@@ -14,9 +14,7 @@ export class CommunicationService {
   }
 
   connectSocket() {
-    this.socket = io(
-      'https://expresssimpledyctjt-xcjo--3000.local-credentialless.webcontainer.io/'
-    );
+    this.socket = io('http://localhost:3000');
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });

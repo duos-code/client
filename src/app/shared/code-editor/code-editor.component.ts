@@ -3,8 +3,6 @@ import {
   Input,
   Output,
   EventEmitter,
-  SimpleChanges,
-  ChangeDetectionStrategy,
   ViewChild,
   ElementRef,
 } from '@angular/core';
@@ -21,54 +19,35 @@ export class CodeEditorComponent {
   @Input() activeTheme = 'vs';
 
   @Input() codeModel: Code = {
-    language: 'c',
     uri: 'main.c',
-    value: '{}',
+    value: '',
     input: '',
     output: 'Click on RUN button to see the output',
+    editorOptions: { theme: 'vs-light', language: 'javascript' },
   };
 
   @Output() anyChangedEvent: EventEmitter<Code> = new EventEmitter<Code>();
 
-  options = {
-    contextmenu: false,
-    minimap: {
-      enabled: false,
-    },
-  };
-
-  readOnly = false;
-
-  dependencies: string[] = [
-    '@types/node',
-    '@ngstack/translate',
-    '@ngstack/code-editor',
-  ];
+  onInit(editor: any) {
+    let line = editor.getPosition();
+    console.log(line);
+  }
 
   onLanguageChange(option: any) {
-    this.codeModel.language = option.value;
+    this.codeModel.editorOptions.language = option.value;
     this.anyChangedEvent.emit(this.codeModel);
   }
 
   onInputChange(inputBox: any) {
     this.codeModel.input = inputBox.value;
     this.anyChangedEvent.emit(this.codeModel);
-    console.log(this.codeModel.value);
   }
 
   onCodeChange(code: any) {
-    console.log(this.codeModel.value);
-    // if (code != this.codeModel.value) {
-    //   this.codeModel.value = code;
-    //   this.anyChangedEvent.emit(this.codeModel);
-    // }
-    //this.anyChangedEvent.emit(this.codeModel);
+    this.anyChangedEvent.emit(this.codeModel);
   }
 
   handleRunCode() {
-    // this.anyChangedEvent.emit(this.codeModel);
-    // this.codeModel.value = 'kjkjhk';
-    //this.codeRef.nativeElement;
-    console.log(this.codeRef.nativeElement);
+    console.log(this.codeModel.value);
   }
 }

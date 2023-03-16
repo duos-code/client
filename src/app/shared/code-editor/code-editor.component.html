@@ -1,30 +1,26 @@
 <div class="h-full w-full flex flex-col">
   <!-- code upper box start -->
-  <div class="h-4/6 m-5 pt-12 rounded-t-md border-2 border-gray-20 relative shadow-sm">
+  <div class="h-4/6 m-5 pt-14 rounded-t-md border-2 border-white-20 relative shadow-sm">
 
     <!-- code section start -->
-    <ngs-code-editor #codeRef [codeModel]="codeModel" [options]="options" [theme]="activeTheme"
-      (loaded)="handleRunCode()" (valueChanged)="onCodeChange($event)">
-    </ngs-code-editor>
-
+    <ngx-monaco-editor [options]="codeModel.editorOptions" [(ngModel)]="codeModel.value"
+      (ngModelChange)="onCodeChange($event)" (onInit)="onInit($event)"></ngx-monaco-editor>
     <!-- code section end -->
 
-    <div class="absolute top-0 right-0 px-5 py-2 w-full bg-gray-20">
+    <div class="absolute top-0 right-0 px-5 py-2 w-full bg-white-20">
       <div class="flex flex-row justify-end items-center space-x-2">
 
         <!-- selection button start -->
-        <select #op [value]="codeModel.language" (change)="onLanguageChange(op)" class="p-2 rounded" data-te-select-init
-          data-te-select-auto-select="true">
+        <select #op [value]="codeModel.editorOptions.language" (change)="onLanguageChange(op)" class="p-2 rounded"
+          data-te-select-init data-te-select-auto-select="true">
           <option value="c">C</option>
           <option value="cpp">C++</option>
           <option value="py">Python</option>
         </select> <!-- selection button end -->
 
         <!-- Run button start -->
-        <button (click)="handleRunCode()" type="button" class="inline-block rounded
-             bg-blue px-6 py-1.5 text-sm font-bold uppercase leading-normal
-              text-secondary-100  transition duration-75 ease-in-out hover:bg-primary-900 shadow-sm
-              hover:drop-shadow-md">RUN
+        <button (click)="handleRunCode()" type="button"
+          class="inline-block rounded bg-blue-10 px-6 pt-2.5 pb-2 text-xs font-bold uppercase leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">RUN
         </button> <!-- Run button end -->
       </div>
     </div>
@@ -32,12 +28,12 @@
 
   <div class="flex flex-col h-2/6 mx-5 bg-secondary-50 p-2">
     <div class=" h-fit ">
-      <div class="text-blue font-semibold text-xs">STDIN</div>
+      <div class="text-blue-20 font-bold text-xs">STDIN</div>
       <textarea #inputBox [value]="codeModel.input" (change)="onInputChange(inputBox)"
-        class="peer block bg-secondary-50 w-full rounded border-0 outline-none bg-transparent py-0.5 text-sm placeholder:text-sm "
-        rows="1" placeholder="$ Input fro the program (Optional)"></textarea>
+        class="peer block w-full rounded border-0 outline-none py-0.5 text-sm placeholder:text-sm " rows="1"
+        placeholder="$ Input fro the program (Optional)"></textarea>
 
-      <div class="py-0.5 text-blue font-semibold text-xs">OUTPUT</div>
-      <div class="py-0.5 text-secondary-500 font-semibold text-xs">{{ codeModel.output }}</div>
+      <div class="py-0.5 text-blue-20 font-bold text-xs">OUTPUT</div>
+      <div class="py-0.5 text-gray-10 font-semibold text-xs">{{ codeModel.output }}</div>
     </div>
   </div>
