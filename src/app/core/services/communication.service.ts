@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Peer } from 'peerjs';
 
+import {Apis}  from '../constants/apis';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -14,7 +16,7 @@ export class CommunicationService {
   }
 
   connectSocket() {
-    this.socket = io('http://localhost:3000');
+    this.socket = io(Apis.base_url);
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });

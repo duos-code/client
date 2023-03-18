@@ -7,23 +7,36 @@
         <video #myVideoRef class="w-full h-full  object-cover" autoplay>
         </video>
 
-        <div *ngIf="!isMyCameraOn" class="absolute bottom-0 right-0 w-full h-full  bg-black">
+        <div *ngIf="!videoOption.video" class="absolute bottom-0 right-0 w-full h-full  bg-black">
           <div class="flex flex-row w-full h-full justify-center items-center text-white-10">
             Camera is off
           </div>
         </div>
 
-        <div class="absolute bottom-0 right-0 pb-5 flex flex-row w-full justify-center items-center space-x-2">
+        <div
+          class="absolute bottom-0 right-0 mb-5 flex flex-row h-full w-full justify-center items-end space-x-2">
 
+          <!-- Camera Toggle Button start-->
           <button (click)="handleCameraToggle()" type="button"
-            class="inline-block rounded-full border px-4 py-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out focus:outline-none focus:ring-0 active:bg-white-10">
-            📷
-          </button>
+            class="inline-block rounded-full border-2 w-1/12 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out focus:outline-none focus:ring-0 active:bg-white-10">
+            <div *ngIf="videoOption.video">
+              <fa-icon [icon]="icons.camera"></fa-icon>
+            </div>
+            <div *ngIf="!videoOption.video" class="bg-red-10 rounded-full">
+              <fa-icon [icon]="icons.cameraOff"></fa-icon>
+            </div>
+          </button> <!-- Camera Toggle Button end-->
 
+          <!-- Mic Toggle Button start-->
           <button (click)="handleMicToggle()" type="button"
-            class="inline-block rounded-full border px-4 py-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out  focus:outline-none focus:ring-0 active:bg-white-10">
-            🔊
-          </button>
+            class="inline-block rounded-full border-2  w-1/12 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out  focus:outline-none focus:ring-0 active:bg-white-10">
+            <div *ngIf="videoOption.audio">
+              <fa-icon [icon]="icons.mic"></fa-icon>
+            </div>
+            <div *ngIf="!videoOption.audio" class="bg-red-10 rounded-full">
+              <fa-icon [icon]="icons.micOff"></fa-icon>
+            </div>
+          </button> <!-- Mic Toggle Button end-->
 
         </div>
 
@@ -64,22 +77,62 @@
 
 
       <div class="w-9/12 h-full  border-white-20 border-r-2">
-        <app-code-editor value="code" [codeModel]="codeModel" (anyChangedEvent)="handleAnyChangedEvent($event)" />
+        <app-code-editor [newCode]="newCode" value="code" [codeModel]="codeModel"
+          (anyChangedEvent)="handleAnyChangedEvent($event)" />
       </div>
 
-      <div class="w-3/12">
-        <div class="p-5 rounded-md">
+      <div class="w-3/12 flex flex-col">
+
+        <!-- video box start -->
+        <div class="p-5 relative rounded-md">
+
           <video #myVideoRef class="w-full h-full rounded-md" autoplay>
           </video>
-        </div>
+          <div class="flex flex-row py-7 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
 
-        <div class="p-5 rounded-md">
+            <!-- Camera Toggle Button start-->
+            <button (click)="handleCameraToggle()" type="button"
+              class="inline-block rounded-full border-2 h-1/6 w-1/6 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out focus:outline-none focus:ring-0 active:bg-white-10">
+              <div *ngIf="videoOption.video">
+                <fa-icon [icon]="icons.camera"></fa-icon>
+              </div>
+              <div *ngIf="!videoOption.video" class="bg-red-10 rounded-full">
+                <fa-icon [icon]="icons.cameraOff"></fa-icon>
+              </div>
+            </button> <!-- Camera Toggle Button end-->
+
+            <!-- Mic Toggle Button start -->
+            <button (click)="handleMicToggle()" type="button"
+              class="inline-block rounded-full border-2 h-1/6 w-1/6 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out  focus:outline-none focus:ring-0 active:bg-white-10">
+              <div *ngIf="videoOption.audio" class="">
+                <fa-icon [icon]="icons.mic"></fa-icon>
+              </div>
+              <div *ngIf="!videoOption.audio" class="bg-red-10 rounded-full">
+                <fa-icon [icon]="icons.micOff"></fa-icon>
+              </div>
+            </button> <!-- Mic Toggle Button end -->
+            <!-- <div (click)="handleMicToggle()" class="text-white-10 ">
+              <div *ngIf="videoOption.audio" class="bg-blue-50 border h-1/6 w-1/6 rounded-full">
+                <fa-icon [icon]="icons.mic"></fa-icon>
+              </div>
+              <div *ngIf="!videoOption.audio" class="bg-gray-40 border h-1/6 w-1/6 rounded-full">
+                <fa-icon [icon]="icons.micOff"></fa-icon>
+              </div>
+            </div> -->
+
+          </div>
+        </div> <!-- video box end -->
+
+        <!-- Remote video box start -->
+        <div class="relative p-5 rounded-md">
           <video #remoteVideoRef class="w-full h-full rounded-md" autoplay>
           </video>
-        </div>
+        </div> <!-- Remote video box end -->
+
+
       </div>
 
-      <button (click)="handleCameraToggle()">OFF</button>
+
 
 
     </div>

@@ -23,4 +23,7 @@ export class HomePageComponent {
   handleCreateRoom() {
     this.communication.createRoom();
   }
+  handleJoinRoom(roomId:any){
+    this.router.navigate([`/${roomId.value}`]);
+  }
 }

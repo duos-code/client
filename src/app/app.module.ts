@@ -11,10 +11,16 @@ import { CodeEditorComponent } from './shared/code-editor/code-editor.component'
 
 import { FormsModule } from '@angular/forms';
 
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+
+import { HttpClientModule } from '@angular/common/http';
+
+
 import {
   MonacoEditorModule,
   NgxMonacoEditorConfig,
 } from 'ngx-monaco-editor-v2';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'app-name/assets', // configure base path for monaco editor. Starting with version 8.0.0 it defaults to './assets'. Previous releases default to '/assets'
@@ -34,14 +40,17 @@ const monacoConfig: NgxMonacoEditorConfig = {
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     CodeEditorModule.forRoot({
       typingsWorkerUrl: 'assets/workers/typings-worker.js',
     }),
     CodeEditorModule.forChild(),
     MonacoEditorModule.forRoot(monacoConfig),
     FormsModule,
+    FontAwesomeModule,
+
   ],
-  providers: [],
+  providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

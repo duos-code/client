@@ -1,10 +1,12 @@
 <div class="h-full w-full flex flex-col">
   <!-- code upper box start -->
-  <div class="h-4/6 m-5 pt-14 rounded-t-md border-2 border-white-20 relative shadow-sm">
+  <div class="h-4/6 m-5 pt-14 rounded-t-md border-2 border-white-20 relative shadow-sm ">
 
     <!-- code section start -->
-    <ngx-monaco-editor [options]="codeModel.editorOptions" [(ngModel)]="codeModel.value"
+
+    <ngx-monaco-editor #codeRef style="height: 100%" [options]="codeModel.editorOptions" [(ngModel)]="codeModel.value"
       (ngModelChange)="onCodeChange($event)" (onInit)="onInit($event)"></ngx-monaco-editor>
+
     <!-- code section end -->
 
     <div class="absolute top-0 right-0 px-5 py-2 w-full bg-white-20">
@@ -13,9 +15,7 @@
         <!-- selection button start -->
         <select #op [value]="codeModel.editorOptions.language" (change)="onLanguageChange(op)" class="p-2 rounded"
           data-te-select-init data-te-select-auto-select="true">
-          <option value="c">C</option>
-          <option value="cpp">C++</option>
-          <option value="py">Python</option>
+          <option *ngFor="let language of languages" [value]=language>{{ language }}</option>
         </select> <!-- selection button end -->
 
         <!-- Run button start -->
@@ -26,14 +26,23 @@
     </div>
   </div> <!-- code upper box end -->
 
-  <div class="flex flex-col h-2/6 mx-5 bg-secondary-50 p-2">
-    <div class=" h-fit ">
-      <div class="text-blue-20 font-bold text-xs">STDIN</div>
-      <textarea #inputBox [value]="codeModel.input" (change)="onInputChange(inputBox)"
-        class="peer block w-full rounded border-0 outline-none py-0.5 text-sm placeholder:text-sm " rows="1"
-        placeholder="$ Input fro the program (Optional)"></textarea>
+  <div class="flex flex-row m-5 mt-0 h-2/6 bg-secondary-50 space-x-2">
 
-      <div class="py-0.5 text-blue-20 font-bold text-xs">OUTPUT</div>
-      <div class="py-0.5 text-gray-10 font-semibold text-xs">{{ codeModel.output }}</div>
-    </div>
+    <!-- Input section start -->
+    <div class="w-2/6 border-white-20 border-2 rounded-md">
+      <div class=" text-blue-20 font-bold text-sm p-2 border-b-2 border-white-20">STDIN</div>
+      <textarea #inputBox [value]="codeModel.input" (change)="onInputChange(inputBox)"
+        class="peer block w-full h-5/6 max-h-44 p-2 rounded border-0 outline-none text-sm placeholder:text-sm " rows="6"
+        placeholder="$ Input fro the program (Optional)"></textarea>
+    </div> <!-- Input section end -->
+
+    <!-- output section start -->
+    <div class="w-4/6 border-white-20  border-2 rounded-md">
+      <div class=" text-blue-20 font-bold text-sm p-2 border-b-2 border-white-20">OUTPUT</div>
+      <div class="h-5/6 max-h-44 min-h-44 p-2 overflow-y-scroll text-gray-10 font-semibold text-sm whitespace-pre">
+        {{ codeModel.output }}
+      </div>
+    </div> <!-- output section end -->
+
   </div>
+</div>

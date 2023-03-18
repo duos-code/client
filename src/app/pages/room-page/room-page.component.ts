@@ -1,8 +1,13 @@
-import { Socket } from 'socket.io-client';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommunicationService } from 'src/app/core/services/communication.service';
 import { Code } from 'src/app/core/interfaces/code.interface';
+import {
+  faMicrophone,
+  faMicrophoneSlash,
+  faCamera,
+  faCameraRotate,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-room-page',
@@ -13,22 +18,39 @@ export class RoomPageComponent {
   public roomId!: string;
 
   public myVideoStream!: any;
-  public remoteStream!: any;
+  public remoteVideoStream!: any;
 
   @ViewChild('myVideoRef') myVideoRef!: ElementRef;
   @ViewChild('remoteVideoRef') remoteVideoRef!: ElementRef;
 
-  public isMyCameraOn: boolean = true;
+  public icons: any = {
+    camera: faCamera,
+    cameraOff: faCameraRotate,
+    mic: faMicrophone,
+    micOff: faMicrophoneSlash,
+  };
+
+  public videoOption: any = {
+    video: false,
+    audio: false,
+  };
+
+  public remoteVideoOption: any = {
+    video: true,
+    audio: true,
+  };
 
   public inMeeting: boolean = false;
 
   public codeModel: Code = {
     uri: 'main.c',
-    value: '{s}',
+    value: '',
     input: '',
     output: 'Click on RUN button to see the output',
     editorOptions: { theme: 'vs-light', language: 'c' },
   };
+
+  public newCode: string = '';
 
   constructor(
     private communication: CommunicationService,
@@ -47,21 +69,17 @@ export class RoomPageComponent {
     });
 
     this.communication.socket.on('join-room-error', ({ message }) => {
-      console.log(message);
       this.router.navigate([`/`]);
     });
 
     this.communication.socket.on('joined-meeting', () => {
-      console.log('joined-meeting');
       this.handlePeerAnswer();
       this.inMeeting = true;
       this.handleMyVideoStream();
     });
 
     this.communication.socket.on('joined-meeting-call', ({ peerId }) => {
-      console.log('joined-meeting-call ', peerId);
       this.inMeeting = true;
-
       this.handlePeerCall(peerId);
     });
 
@@ -78,6 +96,10 @@ export class RoomPageComponent {
 
       if (this.codeModel.value != code.value) {
         this.codeModel.value = code.value;
+        this.newCode = code.value;
+      }
+      if (this.codeModel.output != code.output) {
+        this.codeModel.output = code.output;
       }
     });
   }
@@ -93,6 +115,9 @@ export class RoomPageComponent {
       .then((stream: any) => {
         this.myVideoStream = stream;
         this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
+        console.log(this.myVideoStream);
+        console.log(this.myVideoStream.active);
+        this.handleVideoAudio();
       })
       .catch((err) => {
         /* handle the error */
@@ -108,8 +133,19 @@ export class RoomPageComponent {
       if (track.readyState == 'live' && track.kind === 'video') {
         track.enabled ? (track.enabled = false) : (track.enabled = true);
         track.enabled
-          ? (this.isMyCameraOn = true)
-          : (this.isMyCameraOn = false);
+          ? (this.videoOption.video = true)
+          : (this.videoOption.video = false);
+      }
+    });
+  }
+
+  handleRemoteCameraToggle() {
+    this.remoteVideoStream.getTracks().forEach((track: any) => {
+      if (track.readyState == 'live' && track.kind === 'video') {
+        track.enabled ? (track.enabled = false) : (track.enabled = true);
+        track.enabled
+          ? (this.remoteVideoOption.video = true)
+          : (this.remoteVideoOption.video = false);
       }
     });
   }
@@ -118,14 +154,23 @@ export class RoomPageComponent {
     this.myVideoStream.getTracks().forEach((track: any) => {
       if (track.readyState == 'live' && track.kind === 'audio') {
         track.enabled ? (track.enabled = false) : (track.enabled = true);
+        track.enabled
+          ? (this.videoOption.audio = true)
+          : (this.videoOption.audio = false);
       }
     });
   }
 
-  // handelJoinMeeting(nameBox: any) {
-  //   console.log(nameBox.value);
-  //   this.communication.joinMeeting(nameBox.value, this.roomId);
-  // }
+  handleRemoteMicToggle() {
+    this.remoteVideoStream.getTracks().forEach((track: any) => {
+      if (track.readyState == 'live' && track.kind === 'audio') {
+        track.enabled ? (track.enabled = false) : (track.enabled = true);
+        track.enabled
+          ? (this.remoteVideoOption.audio = true)
+          : (this.remoteVideoOption.audio = false);
+      }
+    });
+  }
 
   handelJoinMeeting() {
     this.communication.joinMeeting('My Name', this.roomId);
@@ -143,11 +188,12 @@ export class RoomPageComponent {
         this.myVideoStream = stream;
         this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
 
+        this.handleVideoAudio();
+
         var call = this.communication.peer.call(remotePeerId, stream);
         call.on('stream', (remoteStream: any) => {
-          console.log('getting a call');
-          this.remoteStream = remoteStream;
-          this.remoteVideoRef.nativeElement.srcObject = this.remoteStream;
+          this.remoteVideoStream = remoteStream;
+          this.remoteVideoRef.nativeElement.srcObject = this.remoteVideoStream;
           this.remoteVideoRef.nativeElement.play();
         });
       })
@@ -163,17 +209,19 @@ export class RoomPageComponent {
     };
 
     this.communication.peer.on('call', (call) => {
-      console.log('getting a call');
       navigator.mediaDevices
         .getUserMedia(constraints)
         .then((stream: any) => {
           this.myVideoStream = stream;
           this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
 
+          this.handleVideoAudio();
+
           call.answer(stream);
           call.on('stream', (remoteStream) => {
-            this.remoteStream = remoteStream;
-            this.remoteVideoRef.nativeElement.srcObject = this.remoteStream;
+            this.remoteVideoStream = remoteStream;
+            this.remoteVideoRef.nativeElement.srcObject =
+              this.remoteVideoStream;
             this.remoteVideoRef.nativeElement.play();
           });
         })
@@ -181,6 +229,16 @@ export class RoomPageComponent {
           console.log('error on ans ', err);
         });
     });
+  }
+
+  handleVideoAudio() {
+    if (!this.videoOption.video) {
+      this.handleCameraToggle();
+    }
+
+    if (!this.videoOption.audio) {
+      this.handleMicToggle();
+    }
   }
 
   handleAnyChangedEvent(code: any) {
