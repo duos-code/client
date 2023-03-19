@@ -1,5 +1,5 @@
-const base_url= 'https://two3x-server.onrender.com';
-//const base_url= 'http://localhost:3000';
+//const base_url= 'https://two3x-server.onrender.com';
+const base_url= 'http://localhost:3000';
 export const Apis: any = {
   base_url:base_url,
   compile_c:  +`${base_url}/compile/c`,

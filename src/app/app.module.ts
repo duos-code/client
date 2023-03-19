@@ -11,7 +11,7 @@ import { CodeEditorComponent } from './shared/code-editor/code-editor.component'
 
 import { FormsModule } from '@angular/forms';
 
-import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { HashLocationStrategy, LocationStrategy ,PathLocationStrategy } from '@angular/common';
 
 import { HttpClientModule } from '@angular/common/http';
 
@@ -50,7 +50,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
     FontAwesomeModule,
 
   ],
-  providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
+  providers: [{ provide: LocationStrategy, useClass: PathLocationStrategy }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

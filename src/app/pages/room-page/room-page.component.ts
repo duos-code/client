@@ -5,8 +5,10 @@ import { Code } from 'src/app/core/interfaces/code.interface';
 import {
   faMicrophone,
   faMicrophoneSlash,
-  faCamera,
-  faCameraRotate,
+  faVideo,
+  faVideoSlash,
+  faPhoneSlash,
+  faPhoneFlip,
 } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -24,10 +26,11 @@ export class RoomPageComponent {
   @ViewChild('remoteVideoRef') remoteVideoRef!: ElementRef;
 
   public icons: any = {
-    camera: faCamera,
-    cameraOff: faCameraRotate,
+    camera: faVideo,
+    cameraOff: faVideoSlash,
     mic: faMicrophone,
     micOff: faMicrophoneSlash,
+    phone: faPhoneFlip,
   };
 
   public videoOption: any = {
@@ -51,6 +54,11 @@ export class RoomPageComponent {
   };
 
   public newCode: string = '';
+
+  private constraints = {
+    audio: true,
+    video: { width: 640, height: 360 },
+  };
 
   constructor(
     private communication: CommunicationService,
@@ -102,21 +110,31 @@ export class RoomPageComponent {
         this.codeModel.output = code.output;
       }
     });
+
+    this.communication.socket.on('disconnected', () => {
+      console.log('disconnected');
+      this.remoteVideoRef.nativeElement.style.visibility = 'hidden';
+      this.communication.joinMeeting('', this.roomId);
+    });
+
+    this.communication.peer.on('close', () => {
+      console.log('end call');
+    });
+    this.communication.peer.on('disconnected', function () {
+      console.log('disconnected');
+    });
+  }
+
+  handleCallEnd() {
+    window.location.reload();
   }
 
   handleMyVideoStream() {
-    var constraints = {
-      audio: true,
-      video: { width: 640, height: 360 },
-    };
-
     navigator.mediaDevices
-      .getUserMedia(constraints)
+      .getUserMedia(this.constraints)
       .then((stream: any) => {
         this.myVideoStream = stream;
         this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
-        console.log(this.myVideoStream);
-        console.log(this.myVideoStream.active);
         this.handleVideoAudio();
       })
       .catch((err) => {
@@ -176,14 +194,12 @@ export class RoomPageComponent {
     this.communication.joinMeeting('My Name', this.roomId);
   }
 
+  /**
+   * call another peer user using peer id
+   **/
   handlePeerCall(remotePeerId: string) {
-    var constraints = {
-      audio: true,
-      video: { width: 640, height: 360 },
-    };
-
     navigator.mediaDevices
-      .getUserMedia(constraints)
+      .getUserMedia(this.constraints)
       .then((stream: any) => {
         this.myVideoStream = stream;
         this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
@@ -192,6 +208,7 @@ export class RoomPageComponent {
 
         var call = this.communication.peer.call(remotePeerId, stream);
         call.on('stream', (remoteStream: any) => {
+          this.remoteVideoRef.nativeElement.style.visibility = 'visible';
           this.remoteVideoStream = remoteStream;
           this.remoteVideoRef.nativeElement.srcObject = this.remoteVideoStream;
           this.remoteVideoRef.nativeElement.play();
@@ -202,15 +219,13 @@ export class RoomPageComponent {
       });
   }
 
+  /**
+   * Answer call if Any Call is comming
+   **/
   handlePeerAnswer() {
-    var constraints = {
-      audio: true,
-      video: { width: 640, height: 360 },
-    };
-
     this.communication.peer.on('call', (call) => {
       navigator.mediaDevices
-        .getUserMedia(constraints)
+        .getUserMedia(this.constraints)
         .then((stream: any) => {
           this.myVideoStream = stream;
           this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
@@ -219,6 +234,7 @@ export class RoomPageComponent {
 
           call.answer(stream);
           call.on('stream', (remoteStream) => {
+            this.remoteVideoRef.nativeElement.style.visibility = 'visible';
             this.remoteVideoStream = remoteStream;
             this.remoteVideoRef.nativeElement.srcObject =
               this.remoteVideoStream;
@@ -231,6 +247,9 @@ export class RoomPageComponent {
     });
   }
 
+  /**
+   * Handle Video Audio Check User Video Mic Status
+   **/
   handleVideoAudio() {
     if (!this.videoOption.video) {
       this.handleCameraToggle();
@@ -241,6 +260,9 @@ export class RoomPageComponent {
     }
   }
 
+  /**
+   * If any changed in code editor its emit socket
+   **/
   handleAnyChangedEvent(code: any) {
     this.communication.socket.emit('code-change', {
       code: code,

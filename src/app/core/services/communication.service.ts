@@ -16,11 +16,7 @@ export class CommunicationService {
   }
 
   connectSocket() {
-<<<<<<< HEAD
     this.socket = io(Apis.base_url);
-=======
-    this.socket = io('https://two3x-server.onrender.com');
->>>>>>> 360fee8df780e7d85e0ed0e7dae9b4af849d9632
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });
