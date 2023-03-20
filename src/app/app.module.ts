@@ -11,16 +11,27 @@ import { CodeEditorComponent } from './shared/code-editor/code-editor.component'
 
 import { FormsModule } from '@angular/forms';
 
-import { HashLocationStrategy, LocationStrategy ,PathLocationStrategy } from '@angular/common';
+import {
+  HashLocationStrategy,
+  LocationStrategy,
+  PathLocationStrategy,
+} from '@angular/common';
 
 import { HttpClientModule } from '@angular/common/http';
 
+import {
+  GoogleSigninButtonModule,
+  SocialAuthServiceConfig,
+  SocialLoginModule,
+} from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
 
 import {
   MonacoEditorModule,
   NgxMonacoEditorConfig,
 } from 'ngx-monaco-editor-v2';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { GoogleAuthComponent } from './shared/google-auth/google-auth.component';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'app-name/assets', // configure base path for monaco editor. Starting with version 8.0.0 it defaults to './assets'. Previous releases default to '/assets'
@@ -36,6 +47,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
     HomePageComponent,
     RoomPageComponent,
     CodeEditorComponent,
+    GoogleAuthComponent,
   ],
   imports: [
     BrowserModule,
@@ -48,9 +60,29 @@ const monacoConfig: NgxMonacoEditorConfig = {
     MonacoEditorModule.forRoot(monacoConfig),
     FormsModule,
     FontAwesomeModule,
-
+    SocialLoginModule,
+    GoogleSigninButtonModule,
   ],
-  providers: [{ provide: LocationStrategy, useClass: PathLocationStrategy }],
+  providers: [
+    { provide: LocationStrategy, useClass: PathLocationStrategy },
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '17524549635-g6flutpenm7fdoie4vaing94tqiir4b6.apps.googleusercontent.com'
+            ),
+          },
+        ],
+        onError: (err) => {
+          console.error(err);
+        },
+      } as SocialAuthServiceConfig,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

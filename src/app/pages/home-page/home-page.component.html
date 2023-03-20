@@ -1,14 +1,61 @@
-<div class="flex flex-col justify-center items-center h-screen w-screen">
+<div class="h-screen w-screen">
 
-  <div class="mb-3 xl:w-96">
-    <button (click)="handleCreateRoom()" type="button"
-      class="inline-block rounded bg-neutral-50 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-neutral-800 shadow-[0_4px_9px_-4px_#fbfbfb] transition duration-150 ease-in-out hover:bg-neutral-100 hover:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)] focus:bg-neutral-100 focus:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)] focus:outline-none focus:ring-0 active:bg-neutral-200 active:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)]">
-      Create Room
-    </button>
-    <input #roomId class="border" placeholder="Enter room code" />
-    <button (click)="handleJoinRoom(roomId)" type="button"
-      class="inline-block rounded bg-neutral-50 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-neutral-800 shadow-[0_4px_9px_-4px_#fbfbfb] transition duration-150 ease-in-out hover:bg-neutral-100 hover:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)] focus:bg-neutral-100 focus:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)] focus:outline-none focus:ring-0 active:bg-neutral-200 active:shadow-[0_8px_9px_-4px_rgba(251,251,251,0.3),0_4px_18px_0_rgba(251,251,251,0.2)]">
-      Join Room
-    </button>
+  <div class="flex flex-col h-full w-full ">
+
+    <div class="flex flex-row justify-between px-5 py-3 border-white-20 border-b-2 shadow-white-20">
+      <div class="font-medium text-xl">
+        DuosCode
+      </div>
+
+      <app-google-auth *ngIf="!user" />
+
+      <div *ngIf="user" class="flex flex-row space-x-2 justify-center items-center">
+        <div class="font-medium text-base">{{ user.name }}</div>
+        <img class="w-8 rounded-full" src="{{ user.photoUrl }}" referrerpolicy="no-referrer">
+
+      </div>
+    </div>
+    <div class="flex flex-row w-full h-full">
+
+      <div class="w-6/12 h-full flex flex-col justify-center items-center px-10 space-y-5">
+        <div class="font-medium text-5xl text-clip text-gray-40">
+          Code with your buddy.
+          No need to install IDE's.
+        </div>
+
+        <div class="font-sans text-2xl text-white-50">
+          Online IDE with 5 different programming language,
+          Real time sync code, secure p2p video chat and many more!
+        </div>
+
+        <div class="flex flex-row w-full space-x-2">
+
+          <button (click)="handleCreateRoom()" type="button"
+            class="w-10/12 rounded-full bg-blue-10 px-6 text-base text-center font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
+            Create Room
+          </button>
+
+          <div class="flex flex-row w-full">
+            <input #roomBox type="text" (focus)="handleShowJoinBtn(true)"
+              (blur)="handleShowJoinBtn(roomBox.value != '' ? true : false)"
+              class="relative w-full rounded-full border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
+              placeholder="Enter code" />
+
+            <div *ngIf="visibleJoinBtn" class="text-center flex justify-center items-center">
+              <button (click)="handleJoinRoom(roomBox)" type="button"
+                class="px-3 text-lg font-medium leading-normal text-blue-10 text-center   transition duration-150 ease-in-out hover:text-blue-20  focus:text-blue-20  focus:outline-blue-10">
+                Join
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="w-6/12">
+
+      </div>
+    </div>
   </div>
 </div>

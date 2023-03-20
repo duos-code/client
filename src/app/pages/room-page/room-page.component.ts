@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { UserService } from 'src/app/core/services/user.service';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommunicationService } from 'src/app/core/services/communication.service';
 import { Code } from 'src/app/core/interfaces/code.interface';
@@ -7,16 +8,17 @@ import {
   faMicrophoneSlash,
   faVideo,
   faVideoSlash,
-  faPhoneSlash,
   faPhoneFlip,
 } from '@fortawesome/free-solid-svg-icons';
+import { SocialUser } from '@abacritt/angularx-social-login';
+import { socketuser } from 'src/app/core/interfaces/socketuser.interface';
 
 @Component({
   selector: 'app-room-page',
   templateUrl: './room-page.component.html',
   styleUrls: ['./room-page.component.css'],
 })
-export class RoomPageComponent {
+export class RoomPageComponent implements OnInit {
   public roomId!: string;
 
   public myVideoStream!: any;
@@ -24,6 +26,8 @@ export class RoomPageComponent {
 
   @ViewChild('myVideoRef') myVideoRef!: ElementRef;
   @ViewChild('remoteVideoRef') remoteVideoRef!: ElementRef;
+  @ViewChild('remoteVideoBoxRef', { read: ElementRef })
+  remoteVideoBoxRef!: ElementRef;
 
   public icons: any = {
     camera: faVideo,
@@ -60,14 +64,22 @@ export class RoomPageComponent {
     video: { width: 640, height: 360 },
   };
 
+  public remoteUser!: socketuser;
+
   constructor(
     private communication: CommunicationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public userService: UserService
   ) {}
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('roomId') as string;
+    if (!this.userService.user) {
+      console.warn('login need');
+      this.router.navigate([`/`]);
+      return;
+    }
 
     this.handleJoinRoom(this.roomId);
 
@@ -111,10 +123,17 @@ export class RoomPageComponent {
       }
     });
 
+    this.communication.socket.on('recived-remoteUser', (data) => {
+      const { user } = data;
+      console.log('remoteUser ', user);
+      this.remoteUser = user as socketuser;
+    });
+
     this.communication.socket.on('disconnected', () => {
       console.log('disconnected');
-      this.remoteVideoRef.nativeElement.style.visibility = 'hidden';
-      this.communication.joinMeeting('', this.roomId);
+      if (!this.inMeeting) return;
+      this.handleRemoteBoxShow(false);
+      this.handelJoinMeeting();
     });
 
     this.communication.peer.on('close', () => {
@@ -127,6 +146,18 @@ export class RoomPageComponent {
 
   handleCallEnd() {
     window.location.reload();
+  }
+
+  handleRemoteBoxShow(show: boolean) {
+    if (show) {
+      try {
+        this.remoteVideoBoxRef.nativeElement.style.display = 'block';
+      } catch (err) {}
+    } else {
+      try {
+        this.remoteVideoBoxRef.nativeElement.style.display = 'none';
+      } catch (err) {}
+    }
   }
 
   handleMyVideoStream() {
@@ -191,7 +222,7 @@ export class RoomPageComponent {
   }
 
   handelJoinMeeting() {
-    this.communication.joinMeeting('My Name', this.roomId);
+    this.communication.joinMeeting(this.userService.user, this.roomId);
   }
 
   /**
@@ -208,10 +239,10 @@ export class RoomPageComponent {
 
         var call = this.communication.peer.call(remotePeerId, stream);
         call.on('stream', (remoteStream: any) => {
-          this.remoteVideoRef.nativeElement.style.visibility = 'visible';
           this.remoteVideoStream = remoteStream;
           this.remoteVideoRef.nativeElement.srcObject = this.remoteVideoStream;
           this.remoteVideoRef.nativeElement.play();
+          this.handleRemoteBoxShow(true);
         });
       })
       .catch((err) => {
@@ -234,11 +265,11 @@ export class RoomPageComponent {
 
           call.answer(stream);
           call.on('stream', (remoteStream) => {
-            this.remoteVideoRef.nativeElement.style.visibility = 'visible';
             this.remoteVideoStream = remoteStream;
             this.remoteVideoRef.nativeElement.srcObject =
               this.remoteVideoStream;
             this.remoteVideoRef.nativeElement.play();
+            this.handleRemoteBoxShow(true);
           });
         })
         .catch((err) => {

@@ -1,8 +1,10 @@
+import { SocialUser } from '@abacritt/angularx-social-login';
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Peer } from 'peerjs';
 
-import {Apis}  from '../constants/apis';
+import { Apis } from '../constants/apis';
+import { socketuser } from '../interfaces/socketuser.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +24,7 @@ export class CommunicationService {
     });
   }
 
-  joinMeeting(user: string, roomId: string) {
+  joinMeeting(user: socketuser, roomId: string) {
     this.peer = new Peer();
     this.peer.on('open', (id) => {
       console.log('peer ', id);

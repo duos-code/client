@@ -13,7 +13,7 @@
           </div>
         </div>
 
-        <div class="absolute bottom-0 right-0 mb-5 flex flex-row h-full w-full justify-center items-end space-x-2">
+        <div class="absolute bottom-0 right-0 mb-5 flex flex-row h-full w-full justify-center items-end space-x-2 ">
 
           <!-- Camera Toggle Button start-->
           <button (click)="handleCameraToggle()" type="button"
@@ -44,22 +44,23 @@
     </div>
 
 
-    <div class="flex flex-col justify-center items-center w-4/12 h-full px-5 border-l border-white-20">
+    <div class="flex flex-col justify-between items-center w-4/12 h-full px-5 py-16 border-l border-white-20">
 
-      <div class="pt-2.5 pb-2 font-semibold text-white-40">Ready to join?</div>
-      <div class="pt-2.5 pb-2">{{ roomId }}</div>
 
-      <!-- <div class="mb-3 w-full">
-        <input #nameBox
-          class="m-0 block w-full pt-2.5 pb-2 flex-auto text-center rounded border border-solid border-gray-10 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
-          placeholder="Enter your name" />
-      </div> -->
+      <div></div>
 
-      <div class="mb-3">
+      <div class="flex flex-col space-y-10">
+        <div class="font-semibold text-2xl text-black">Ready to join?</div>
         <button (click)="handelJoinMeeting()" type="button"
-          class="inline-block rounded-full bg-blue-10 px-6 pt-2.5 pb-2 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
+          class="inline-block rounded-full bg-blue-10 py-2.5  text-sm text-center font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
           Join meeting
         </button>
+      </div>
+
+      <div class="flex flex-row space-x-1">
+        <div class="text-base">You Join as </div>
+        <div class="font-medium text-base"> {{ userService.user.name }}</div>
+
       </div>
 
     </div>
@@ -80,13 +81,21 @@
           (anyChangedEvent)="handleAnyChangedEvent($event)" />
       </div>
 
-      <div class="w-3/12 flex flex-col">
+      <div class="w-3/12 flex flex-col h-full">
 
         <!-- video box start -->
-        <div class="p-5 relative rounded-md">
+        <div class="p-5 relative rounded-md h-2/6 ">
 
-          <video #myVideoRef class="w-full h-full rounded-md" autoplay>
+          <div class="flex flex-row px-10 py-3 top-3 right-0 w-full absolute justify-start items-center space-x-2">
+            <img class="w-4 rounded-full " src="{{ userService.user.photoUrl }}" referrerpolicy="no-referrer">
+            <div class="flex flex-row justify-start items-center w-full  text-white-10 text-base ">{{
+              userService.user.name }}
+            </div>
+          </div>
+
+          <video #myVideoRef class="w-full h-full rounded-md bg-black object-cover" autoplay>
           </video>
+
           <div class="flex flex-row py-7 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
 
             <!-- Camera Toggle Button start-->
@@ -120,12 +129,48 @@
             </button> <!-- Mic Toggle Button end-->
 
           </div>
+
         </div> <!-- video box end -->
 
         <!-- Remote video box start -->
-        <div class="relative p-5 rounded-md">
-          <video #remoteVideoRef class="w-full h-full rounded-md" autoplay>
+        <div #remoteVideoBoxRef class="relative p-5 rounded-md h-2/6 hidden">
+
+          <div class="flex flex-row px-10 py-3 top-3 right-0 w-full absolute justify-start items-center space-x-2">
+            <img class="w-4 rounded-full " src="{{ remoteUser? remoteUser.photoUrl :userService.user.photoUrl}}"
+              referrerpolicy="no-referrer">
+            <div class="flex flex-row justify-start items-center w-full  text-white-10 text-base ">{{ remoteUser?
+              remoteUser.name : 'null' }}
+            </div>
+          </div>
+
+          <video #remoteVideoRef class="w-full h-full rounded-md bg-black object-cover" autoplay>
           </video>
+          <div class="flex flex-row py-7 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
+
+            <!-- Camera Toggle Button start-->
+            <button (click)="handleRemoteCameraToggle()" type="button"
+              class="inline-block rounded-full border-2 h-1/6 w-1/6 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out focus:outline-none focus:ring-0 active:bg-white-10">
+              <div *ngIf="remoteVideoOption.video">
+                <fa-icon [icon]="icons.camera"></fa-icon>
+              </div>
+              <div *ngIf="!remoteVideoOption.video" class="bg-red-10 rounded-full">
+                <fa-icon [icon]="icons.cameraOff"></fa-icon>
+              </div>
+            </button> <!-- Camera Toggle Button end-->
+
+            <!-- Mic Toggle Button start -->
+            <button (click)="handleRemoteMicToggle()" type="button"
+              class="inline-block rounded-full border-2 h-1/6 w-1/6 text-xs font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out  focus:outline-none focus:ring-0 active:bg-white-10">
+              <div *ngIf="remoteVideoOption.audio" class="">
+                <fa-icon [icon]="icons.mic"></fa-icon>
+              </div>
+              <div *ngIf="!remoteVideoOption.audio" class="bg-red-10 rounded-full">
+                <fa-icon [icon]="icons.micOff"></fa-icon>
+              </div>
+            </button>
+
+
+          </div>
         </div> <!-- Remote video box end -->
 
 
