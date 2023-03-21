@@ -3,9 +3,13 @@
   <div class="flex flex-col h-full w-full ">
 
     <div class="flex flex-row justify-between px-5 py-3 border-white-20 border-b-2 shadow-white-20">
-      <div class="font-medium text-xl">
-        DuosCode
+      <div class="flex flex-row space-x-3">
+        <!-- <img class="h-8" src="assets/images/duoscode.png"> -->
+        <div class="font-medium text-xl">
+          DuosCode
+        </div>
       </div>
+
 
       <app-google-auth *ngIf="!user" />
 
@@ -35,7 +39,7 @@
             Create Room
           </button>
 
-          <div class="flex flex-row w-full">
+          <div class="flex flex-row w-full pr-5">
             <input #roomBox type="text" (focus)="handleShowJoinBtn(true)"
               (blur)="handleShowJoinBtn(roomBox.value != '' ? true : false)"
               class="relative w-full rounded-full border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"

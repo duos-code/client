@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Code } from '../interfaces/code.interface';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Apis } from '../constants/apis';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +11,11 @@ export class CompileService {
     .set('content-type', 'application/json')
     .set('Access-Control-Allow-Origin', '*');
 
-  constructor(private http: HttpClient) {}
+  private domain: string | undefined;
+
+  constructor(private http: HttpClient) {
+    this.domain = environment.base_url;
+  }
 
   runCode(codeModel: Code): any {
     switch (codeModel.editorOptions.language) {
@@ -36,7 +40,7 @@ export class CompileService {
   }
 
   compileC(code: string, stdin: string): any {
-    const url = Apis.compile_c;
+    const url = this.domain + '/compile/c';
     return this.http.post(
       url,
       { code: code, stdin: stdin },
@@ -45,7 +49,7 @@ export class CompileService {
   }
 
   compileCpp(code: string, stdin: string): any {
-    const url = Apis.compile_cpp;
+    const url = this.domain + '/compile/cpp';
     return this.http.post(
       url,
       { code: code, stdin: stdin },
@@ -54,7 +58,7 @@ export class CompileService {
   }
 
   compileNode(code: string, stdin: string): any {
-    const url = Apis.compile_node;
+    const url = this.domain + '/compile/node';
     return this.http.post(
       url,
       { code: code, stdin: stdin },
@@ -63,7 +67,7 @@ export class CompileService {
   }
 
   compileJava(code: string, stdin: string): any {
-    const url = Apis.compile_java;
+    const url = this.domain + '/compile/java';
     return this.http.post(
       url,
       { code: code, stdin: stdin },
@@ -72,7 +76,7 @@ export class CompileService {
   }
 
   compilePy(code: string, stdin: string): any {
-    const url = Apis.compile_py;
+    const url = this.domain + '/compile/py';
     return this.http.post(
       url,
       { code: code, stdin: stdin },

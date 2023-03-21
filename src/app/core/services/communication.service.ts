@@ -1,9 +1,8 @@
-import { SocialUser } from '@abacritt/angularx-social-login';
+import { environment } from './../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Peer } from 'peerjs';
 
-import { Apis } from '../constants/apis';
 import { socketuser } from '../interfaces/socketuser.interface';
 
 @Injectable({
@@ -13,12 +12,15 @@ export class CommunicationService {
   public socket!: Socket;
   public peer!: Peer;
 
+  private domain: string | undefined;
+
   constructor() {
+    this.domain = environment.base_url;
     this.connectSocket();
   }
 
   connectSocket() {
-    this.socket = io(Apis.base_url);
+    this.socket = io(this.domain as string);
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });

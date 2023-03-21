@@ -3,6 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommunicationService } from 'src/app/core/services/communication.service';
 import { Code } from 'src/app/core/interfaces/code.interface';
+import { Title } from '@angular/platform-browser';
 import {
   faMicrophone,
   faMicrophoneSlash,
@@ -10,7 +11,6 @@ import {
   faVideoSlash,
   faPhoneFlip,
 } from '@fortawesome/free-solid-svg-icons';
-import { SocialUser } from '@abacritt/angularx-social-login';
 import { socketuser } from 'src/app/core/interfaces/socketuser.interface';
 
 @Component({
@@ -70,7 +70,8 @@ export class RoomPageComponent implements OnInit {
     private communication: CommunicationService,
     private route: ActivatedRoute,
     private router: Router,
-    public userService: UserService
+    public userService: UserService,
+    private titleService: Title
   ) {}
 
   ngOnInit() {
@@ -81,7 +82,9 @@ export class RoomPageComponent implements OnInit {
       return;
     }
 
-    this.handleJoinRoom(this.roomId);
+    this.titleService.setTitle(`duoscode - ${this.roomId}`);
+
+    this.communication.joinRoom(this.roomId);
 
     this.communication.socket.on('joined-room', ({ roomId }) => {
       this.router.navigate([`/${roomId}`]);
@@ -135,13 +138,6 @@ export class RoomPageComponent implements OnInit {
       this.handleRemoteBoxShow(false);
       this.handelJoinMeeting();
     });
-
-    this.communication.peer.on('close', () => {
-      console.log('end call');
-    });
-    this.communication.peer.on('disconnected', function () {
-      console.log('disconnected');
-    });
   }
 
   handleCallEnd() {
@@ -171,10 +167,6 @@ export class RoomPageComponent implements OnInit {
       .catch((err) => {
         /* handle the error */
       });
-  }
-
-  handleJoinRoom(roomId: string) {
-    this.communication.joinRoom(roomId);
   }
 
   handleCameraToggle() {
