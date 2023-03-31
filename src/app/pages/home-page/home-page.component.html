@@ -21,25 +21,25 @@
     </div>
     <div class="flex flex-row w-full h-full">
 
-      <div class="w-6/12 h-full flex flex-col justify-center items-center px-10 space-y-5">
+      <div class="w-6/12 h-full flex flex-col justify-center items-center px-10 pr-16 space-y-8">
         <div class="font-medium text-5xl text-clip text-gray-40">
           Code with your buddy.
           No need to install IDE's.
         </div>
 
-        <div class="font-sans text-2xl text-white-50">
+        <div class="font-normal text-lg text-gray-40">
           Online IDE with 5 different programming language,
           Real time sync code, secure p2p video chat and many more!
         </div>
 
-        <div class="flex flex-row w-full space-x-2">
+        <div class="flex flex-row w-full pr-10 space-x-2">
 
           <button (click)="handleCreateRoom()" type="button"
             class="w-10/12 rounded-full bg-blue-10 px-6 text-base text-center font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
             Create Room
           </button>
 
-          <div class="flex flex-row w-full pr-5">
+          <div class="flex flex-row w-full pr-5 ">
             <input #roomBox type="text" (focus)="handleShowJoinBtn(true)"
               (blur)="handleShowJoinBtn(roomBox.value != '' ? true : false)"
               class="relative w-full rounded-full border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
@@ -55,10 +55,20 @@
           </div>
         </div>
 
+        <!-- <div class="border-t border-gray-10 w-full mt-5 py-5">
+          x
+        </div> -->
+
       </div>
 
-      <div class="w-6/12">
-
+      <div class="w-6/12 h-full flex flex-col justify-center items-center">
+        <img class="w-4/5 4/5 rounded-full " src="../../../assets/images/duos.jpg" referrerpolicy="no-referrer">
+        <div class="w-3/5 flex flex-col justify-center items-center">
+          <div class="text-3xl font-light">Get a link you can share</div>
+          <div class="text-base text-center">Click <b class="font-medium">Create Room</b> to get a link
+            you can send to buddy
+            you want to code with</div>
+        </div>
       </div>
     </div>
   </div>

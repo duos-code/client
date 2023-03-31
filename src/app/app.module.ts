@@ -11,6 +11,9 @@ import { CodeEditorComponent } from './shared/code-editor/code-editor.component'
 
 import { FormsModule } from '@angular/forms';
 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
+
 import {
   HashLocationStrategy,
   LocationStrategy,
@@ -32,6 +35,7 @@ import {
 } from 'ngx-monaco-editor-v2';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { GoogleAuthComponent } from './shared/google-auth/google-auth.component';
+import { DatePipe } from './core/pipes/date.pipe';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'app-name/assets', // configure base path for monaco editor. Starting with version 8.0.0 it defaults to './assets'. Previous releases default to '/assets'
@@ -48,6 +52,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
     RoomPageComponent,
     CodeEditorComponent,
     GoogleAuthComponent,
+    DatePipe,
   ],
   imports: [
     BrowserModule,
@@ -62,6 +67,13 @@ const monacoConfig: NgxMonacoEditorConfig = {
     FontAwesomeModule,
     SocialLoginModule,
     GoogleSigninButtonModule,
+    BrowserAnimationsModule, // required animations module
+    ToastrModule.forRoot({
+      // toastComponent: ToastComponent,
+      timeOut: 2000,
+      positionClass: 'toast-bottom-left',
+      preventDuplicates: true,
+    }), // ToastrModule added
   ],
   providers: [
     { provide: LocationStrategy, useClass: PathLocationStrategy },

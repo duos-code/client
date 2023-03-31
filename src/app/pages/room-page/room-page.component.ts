@@ -1,3 +1,4 @@
+import { ToastService } from './../../core/services/toast.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +11,7 @@ import {
   faVideo,
   faVideoSlash,
   faPhoneFlip,
+  faPaperPlane,
 } from '@fortawesome/free-solid-svg-icons';
 import { socketuser } from 'src/app/core/interfaces/socketuser.interface';
 
@@ -29,12 +31,15 @@ export class RoomPageComponent implements OnInit {
   @ViewChild('remoteVideoBoxRef', { read: ElementRef })
   remoteVideoBoxRef!: ElementRef;
 
+  @ViewChild('messageBox') messageBoxRef!: ElementRef;
+
   public icons: any = {
     camera: faVideo,
     cameraOff: faVideoSlash,
     mic: faMicrophone,
     micOff: faMicrophoneSlash,
     phone: faPhoneFlip,
+    send: faPaperPlane,
   };
 
   public videoOption: any = {
@@ -64,6 +69,8 @@ export class RoomPageComponent implements OnInit {
     video: { width: 640, height: 360 },
   };
 
+  public roomMessages: Array<any> = [];
+
   public remoteUser!: socketuser;
 
   constructor(
@@ -71,7 +78,8 @@ export class RoomPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     public userService: UserService,
-    private titleService: Title
+    private titleService: Title,
+    private toastr: ToastService
   ) {}
 
   ngOnInit() {
@@ -92,6 +100,7 @@ export class RoomPageComponent implements OnInit {
     });
 
     this.communication.socket.on('join-room-error', ({ message }) => {
+      this.toastr.info(message);
       this.router.navigate([`/`]);
     });
 
@@ -126,18 +135,39 @@ export class RoomPageComponent implements OnInit {
       }
     });
 
-    this.communication.socket.on('recived-remoteUser', (data) => {
-      const { user } = data;
-      console.log('remoteUser ', user);
+    this.communication.socket.on('recived-existed-user', ({ user }) => {
       this.remoteUser = user as socketuser;
     });
 
-    this.communication.socket.on('disconnected', () => {
-      console.log('disconnected');
+    this.communication.socket.on('new-user-joined', ({ user }) => {
+      this.remoteUser = user as socketuser;
+      if (this.inMeeting) this.toastr.info(`${user.name} Joined`);
+    });
+
+    this.communication.socket.on(
+      'recived-message',
+      ({ text, username, time }) => {
+        this.roomMessages.push({ text, username, time });
+      }
+    );
+
+    this.communication.socket.on('disconnected', ({ user }) => {
+      if (this.inMeeting) this.toastr.info(`${user.name} has left the meeting`);
+
       if (!this.inMeeting) return;
       this.handleRemoteBoxShow(false);
       this.handelJoinMeeting();
     });
+  }
+
+  ngAfterViewChecked() {
+    // Chat Box Scroll End
+    try {
+      this.messageBoxRef.nativeElement.scrollTop =
+        this.messageBoxRef.nativeElement.scrollHeight;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   handleCallEnd() {
@@ -263,6 +293,8 @@ export class RoomPageComponent implements OnInit {
             this.remoteVideoRef.nativeElement.play();
             this.handleRemoteBoxShow(true);
           });
+
+          this.handleAnyChangedEvent(this.codeModel);
         })
         .catch((err) => {
           console.log('error on ans ', err);
@@ -291,5 +323,16 @@ export class RoomPageComponent implements OnInit {
       code: code,
       roomId: this.roomId,
     });
+  }
+
+  handleSendMessage(messageBox: any) {
+    if (messageBox.value == '') return;
+
+    this.communication.socket.emit('send-message', {
+      text: messageBox.value,
+      username: this.userService.user.name,
+      room: this.roomId,
+    });
+    messageBox.value = '';
   }
 }

@@ -81,22 +81,21 @@
           (anyChangedEvent)="handleAnyChangedEvent($event)" />
       </div>
 
-      <div class="w-3/12 flex flex-col h-full">
+      <div class="w-3/12 flex flex-col h-full p-5 space-y-4">
 
         <!-- video box start -->
-        <div class="p-5 relative rounded-md h-2/6 ">
+        <div class="relative rounded-md h-2/6 ">
 
-          <div class="flex flex-row px-10 py-3 top-3 right-0 w-full absolute justify-start items-center space-x-2">
+          <div class="flex flex-row p-3 top-0 right-0 w-full absolute justify-start items-center space-x-2">
             <img class="w-4 rounded-full " src="{{ userService.user.photoUrl }}" referrerpolicy="no-referrer">
-            <div class="flex flex-row justify-start items-center w-full  text-white-10 text-base ">{{
-              userService.user.name }}
+            <div class="flex flex-row justify-start items-center w-full  text-white-10 text-base ">You
             </div>
           </div>
 
           <video #myVideoRef class="w-full h-full rounded-md bg-black object-cover" autoplay>
           </video>
 
-          <div class="flex flex-row py-7 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
+          <div class="flex flex-row py-5 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
 
             <!-- Camera Toggle Button start-->
             <button (click)="handleCameraToggle()" type="button"
@@ -133,10 +132,10 @@
         </div> <!-- video box end -->
 
         <!-- Remote video box start -->
-        <div #remoteVideoBoxRef class="relative p-5 rounded-md h-2/6 hidden">
+        <div #remoteVideoBoxRef class="relative  rounded-md h-2/6 hidden">
 
-          <div class="flex flex-row px-10 py-3 top-3 right-0 w-full absolute justify-start items-center space-x-2">
-            <img class="w-4 rounded-full " src="{{ remoteUser? remoteUser.photoUrl :userService.user.photoUrl}}"
+          <div class="flex flex-row p-3  top-0 right-0 w-full absolute justify-start items-center space-x-2">
+            <img class="w-4 rounded-full " src="{{ remoteUser? remoteUser.photoUrl :null}}"
               referrerpolicy="no-referrer">
             <div class="flex flex-row justify-start items-center w-full  text-white-10 text-base ">{{ remoteUser?
               remoteUser.name : 'null' }}
@@ -145,7 +144,7 @@
 
           <video #remoteVideoRef class="w-full h-full rounded-md bg-black object-cover" autoplay>
           </video>
-          <div class="flex flex-row py-7 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
+          <div class="flex flex-row py-5 bottom-0 right-0 w-full absolute justify-center items-center space-x-2">
 
             <!-- Camera Toggle Button start-->
             <button (click)="handleRemoteCameraToggle()" type="button"
@@ -174,18 +173,55 @@
         </div> <!-- Remote video box end -->
 
 
+        <!-- Message Box Component Start -->
+        <div class="w-full  h-2/6 flex flex-col justify-between border-white-20  border-2 rounded-md">
+
+
+          <div class=" text-blue-20 font-bold text-sm p-2 border-b-2 border-white-20 overflow-hidden">
+            In Call
+            Messages</div>
+
+          <!-- Message List Section start -->
+          <div #messageBox class="h-4/5 w-full overflow-auto ">
+            <div *ngFor="let message of roomMessages" class="flex flex-col w-full space-y-1 py-0.5 px-2 justify-end ">
+              <div class="flex flex-row items-center space-x-2">
+                <div class="text-sm font-medium overflow-clip">{{ message.username==userService.user.name?
+                  "You":message.username
+                  }}</div>
+                <div class="text-xs">{{ message.time | date}}</div>
+              </div>
+              <div class="text-sm font-light w-full text-gray-20 break-words">
+                {{ message.text
+                }}
+              </div>
+            </div>
+          </div> <!-- Message List Section End -->
+
+
+          <!-- Message-Box Send Button Start -->
+          <div class="p-1.5">
+            <div class="w-full px-3 flex flex-row justify-center border-white-20  border-2 rounded-full space-x-2">
+              <input #messageInput type="text" class="w-full outline-none text-base" placeholder="Send a message">
+              <button (click)="handleSendMessage(messageInput)" class="h-full  text-blue-20">
+
+                <fa-icon [icon]="icons.send"></fa-icon>
+
+              </button>
+            </div>
+          </div> <!-- Message-Box Send Button End -->
+
+        </div> <!-- Message Box Component End -->
+
+
       </div>
-
-
 
 
     </div>
 
 
 
-
-
   </ng-template>
+
 
 
 </div>

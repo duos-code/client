@@ -35,7 +35,11 @@ module.exports = {
         50: '#353D47',
       },
     },
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'duos': "url('./src/assets/images/duos.jpg')",
+      }
+    },
   },
 
   plugins: []

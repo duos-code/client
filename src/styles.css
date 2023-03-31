@@ -1,4 +1,48 @@
 /* You can add global styles to this file, and also import other style files */
 @tailwind base;
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--primary);
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 15px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 14px;
+  border: 3px solid var(--primary);
+}
+
+
 @tailwind components;
 @tailwind utilities;
+
+@import 'ngx-toastr/toastr';
+
+
+.toast-container .ngx-toastr {
+  background-color: #2E2E2E !important;
+  box-shadow: 0 0 12px #3b3b3b !important;
+}
+
+.toast-title{
+  color: white !important;
+  font-weight: 200;
+  font-size: 16px !important;
+}
+
+.toast-info{
+  font-size: smaller;
+  font-weight: 200;
+  color:white !important;
+}
