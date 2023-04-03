@@ -1,3 +1,5 @@
+import { ToastrService } from 'ngx-toastr';
+import { FileService } from './../../core/services/file.service';
 import { compiled } from './../../core/interfaces/compiled.interface';
 import { CompileService } from './../../core/services/compile.service';
 import { CommunicationService } from 'src/app/core/services/communication.service';
@@ -11,6 +13,7 @@ import {
 } from '@angular/core';
 import { Code } from 'src/app/core/interfaces/code.interface';
 import { language } from 'src/app/core/constants/language';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-code-editor',
@@ -19,6 +22,8 @@ import { language } from 'src/app/core/constants/language';
 })
 export class CodeEditorComponent {
   @ViewChild('codeRef') codeRef!: ElementRef;
+
+  @Input() fileName: string = '';
 
   @Input() activeTheme = 'vs';
 
@@ -38,7 +43,12 @@ export class CodeEditorComponent {
 
   public languages: Array<string> = language;
 
-  constructor(private compiler: CompileService) {}
+  constructor(
+    private compiler: CompileService,
+    private fileService: FileService,
+    private toastrService: ToastrService,
+    private router: Router
+  ) {}
 
   onInit(editor: any) {
     this.editorRef = editor;
@@ -61,8 +71,20 @@ export class CodeEditorComponent {
     this.anyChangedEvent.emit(this.codeModel);
   }
 
+  handleDownloadCode() {
+    var code = this.codeModel.value;
+    var lenguage = this.codeModel.editorOptions.language;
+    var fileName = this.fileName;
+    this.fileService.saveCodeAsFile(code, lenguage, fileName);
+  }
+
+  handleCopyRoomCode() {
+    navigator.clipboard.writeText(window.location.href);
+    this.toastrService.info('copied metting link');
+  }
+
   handleRunCode() {
-    this.codeModel.output = 'compling ..'
+    this.codeModel.output = 'compling ..';
     this.compiler.runCode(this.codeModel).subscribe((res: compiled) => {
       if (res.exitCode) {
         this.codeModel.output = res.stderr;

@@ -13,9 +13,14 @@
 
       <app-google-auth *ngIf="!user" />
 
-      <div *ngIf="user" class="flex flex-row space-x-2 justify-center items-center">
-        <div class="font-medium text-base">{{ user.name }}</div>
-        <img class="w-8 rounded-full" src="{{ user.photoUrl }}" referrerpolicy="no-referrer">
+      <div *ngIf="user" class="h-8 flex flex-row space-x-2 justify-center items-center">
+        <div class="font-medium text-base">{{ user.name }} </div>
+
+        <div class="h-8 rounded-full tooltip">
+          <img class="h-8 rounded-full" src="{{ user.photoUrl }}" referrerpolicy="no-referrer">
+          <div (click)="handleLogout()" class="tooltiptext text-sm px-3 py-1">Logout</div>
+        </div>
+
 
       </div>
     </div>
@@ -35,15 +40,15 @@
         <div class="flex flex-row w-full pr-10 space-x-2">
 
           <button (click)="handleCreateRoom()" type="button"
-            class="w-10/12 rounded-full bg-blue-10 px-6 text-base text-center font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
+            class="w-8/12 rounded-full bg-blue-10 px-6 text-base text-center font-bold leading-normal text-white-10  shadow transition duration-150 ease-in-out hover:bg-blue-20  focus:bg-blue-10 focus:outline-none focus:ring-0 active:bg-blue-20">
             Create Room
           </button>
 
-          <div class="flex flex-row w-full pr-5 ">
+          <div class="flex flex-row w-full pr-16 ">
             <input #roomBox type="text" (focus)="handleShowJoinBtn(true)"
               (blur)="handleShowJoinBtn(roomBox.value != '' ? true : false)"
               class="relative w-full rounded-full border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-1.5 text-base font-normal text-neutral-700 outline-none transition duration-300 ease-in-out focus:border-primary-600 focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200"
-              placeholder="Enter code" />
+              placeholder="Enter a code or link" />
 
             <div *ngIf="visibleJoinBtn" class="text-center flex justify-center items-center">
               <button (click)="handleJoinRoom(roomBox)" type="button"

@@ -25,7 +25,7 @@ export class CompileService {
       case 'cpp':
         return this.compileCpp(codeModel.value, codeModel.input);
 
-      case 'node':
+      case 'javascript':
         return this.compileNode(codeModel.value, codeModel.input);
 
       case 'java':

@@ -11,6 +11,14 @@ export class UserService {
   constructor() {
     this.getUser();
   }
+  async removeUser() {
+    try {
+      localStorage.removeItem('user');
+    } catch (err) {
+      //  console.error(err);
+    }
+  }
+
 
   async getUser() {
     try {

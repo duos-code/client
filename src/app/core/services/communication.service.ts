@@ -16,14 +16,19 @@ export class CommunicationService {
 
   constructor() {
     this.domain = environment.base_url;
-    this.connectSocket();
   }
 
   connectSocket() {
     this.socket = io(this.domain as string);
+
     this.socket.on('connect', () => {
       console.log(`socket id ${this.socket.id}`);
     });
+  }
+
+  resetSocket() {
+    this.disconnectSocket();
+    this.connectSocket();
   }
 
   joinMeeting(user: socketuser, roomId: string) {
@@ -42,17 +47,5 @@ export class CommunicationService {
     if (this.socket) {
       this.socket.disconnect();
     }
-  }
-
-  joinRoom(roomId: string) {
-    var data: any = {
-      roomId: roomId,
-    };
-
-    this.socket.emit('join-room', data);
-  }
-
-  createRoom() {
-    this.socket.emit('create-room');
   }
 }

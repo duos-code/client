@@ -1,6 +1,12 @@
 import { ToastService } from './../../core/services/toast.service';
 import { UserService } from 'src/app/core/services/user.service';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommunicationService } from 'src/app/core/services/communication.service';
 import { Code } from 'src/app/core/interfaces/code.interface';
@@ -23,9 +29,7 @@ import { socketuser } from 'src/app/core/interfaces/socketuser.interface';
 export class RoomPageComponent implements OnInit {
   public roomId!: string;
 
-  public myVideoStream!: any;
-  public remoteVideoStream!: any;
-
+  @ViewChild('myProfilePicRef') myProfilePicRef!: ElementRef;
   @ViewChild('myVideoRef') myVideoRef!: ElementRef;
   @ViewChild('remoteVideoRef') remoteVideoRef!: ElementRef;
   @ViewChild('remoteVideoBoxRef', { read: ElementRef })
@@ -42,17 +46,20 @@ export class RoomPageComponent implements OnInit {
     send: faPaperPlane,
   };
 
-  public videoOption: any = {
+  public myVideoStream!: any;
+  public myVideoOption: any = {
     video: false,
     audio: false,
   };
 
+  public remoteVideoStream!: any;
   public remoteVideoOption: any = {
     video: true,
     audio: true,
   };
 
   public inMeeting: boolean = false;
+  public inRoom: boolean = false;
 
   public codeModel: Code = {
     uri: 'main.c',
@@ -79,10 +86,14 @@ export class RoomPageComponent implements OnInit {
     private router: Router,
     public userService: UserService,
     private titleService: Title,
-    private toastr: ToastService
+    private toastr: ToastService,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit() {
+    // Reset Socket
+    this.communication.resetSocket();
+
     this.roomId = this.route.snapshot.paramMap.get('roomId') as string;
     if (!this.userService.user) {
       console.warn('login need');
@@ -90,31 +101,75 @@ export class RoomPageComponent implements OnInit {
       return;
     }
 
+    // Set Page Titel as Room ID or Code
     this.titleService.setTitle(`duoscode - ${this.roomId}`);
 
-    this.communication.joinRoom(this.roomId);
+    // Join the room with room Id
+    this.JoinRoom(this.roomId);
 
+    this.onJoinedRoom();
+
+    this.onRoomJoinError();
+
+    // Join Meeting
+    this.onJoinedMeeting();
+    this.onRemoteUserJoinedMeeting();
+    this.onRecivedRemoteUserData();
+
+    this.onCodeChanged();
+
+    this.onRecivedMessage();
+
+    this.onRemoteUserDisconnected();
+  }
+
+  JoinRoom(roomId: string) {
+    this.communication.socket.emit('join-room', { roomId: roomId });
+  }
+
+  onJoinedRoom() {
     this.communication.socket.on('joined-room', ({ roomId }) => {
       this.router.navigate([`/${roomId}`]);
-      this.handleMyVideoStream();
+      setTimeout(() => {
+        this.createCamStream();
+        this.inRoom = true;
+      }, 2000);
     });
+  }
 
+  onRoomJoinError() {
     this.communication.socket.on('join-room-error', ({ message }) => {
       this.toastr.info(message);
       this.router.navigate([`/`]);
     });
+  }
 
+  onJoinedMeeting() {
     this.communication.socket.on('joined-meeting', () => {
       this.handlePeerAnswer();
       this.inMeeting = true;
-      this.handleMyVideoStream();
     });
 
     this.communication.socket.on('joined-meeting-call', ({ peerId }) => {
       this.inMeeting = true;
       this.handlePeerCall(peerId);
     });
+  }
 
+  onRemoteUserJoinedMeeting() {
+    this.communication.socket.on('new-user-joined', ({ user }) => {
+      this.remoteUser = user as socketuser;
+      if (this.inMeeting) this.toastr.info(`${user.name} Joined`);
+    });
+  }
+
+  onRecivedRemoteUserData() {
+    this.communication.socket.on('recived-existed-user', ({ user }) => {
+      this.remoteUser = user as socketuser;
+    });
+  }
+
+  onCodeChanged() {
     this.communication.socket.on('code-change', ({ code }) => {
       if (
         this.codeModel.editorOptions.language != code.editorOptions.language
@@ -134,23 +189,18 @@ export class RoomPageComponent implements OnInit {
         this.codeModel.output = code.output;
       }
     });
+  }
 
-    this.communication.socket.on('recived-existed-user', ({ user }) => {
-      this.remoteUser = user as socketuser;
-    });
-
-    this.communication.socket.on('new-user-joined', ({ user }) => {
-      this.remoteUser = user as socketuser;
-      if (this.inMeeting) this.toastr.info(`${user.name} Joined`);
-    });
-
+  onRecivedMessage() {
     this.communication.socket.on(
       'recived-message',
       ({ text, username, time }) => {
         this.roomMessages.push({ text, username, time });
       }
     );
+  }
 
+  onRemoteUserDisconnected() {
     this.communication.socket.on('disconnected', ({ user }) => {
       if (this.inMeeting) this.toastr.info(`${user.name} has left the meeting`);
 
@@ -160,171 +210,144 @@ export class RoomPageComponent implements OnInit {
     });
   }
 
+  /**
+   *  Chat Box Scroll End
+   */
   ngAfterViewChecked() {
-    // Chat Box Scroll End
     try {
       this.messageBoxRef.nativeElement.scrollTop =
         this.messageBoxRef.nativeElement.scrollHeight;
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
-  }
-
-  handleCallEnd() {
-    window.location.reload();
-  }
-
-  handleRemoteBoxShow(show: boolean) {
-    if (show) {
-      try {
-        this.remoteVideoBoxRef.nativeElement.style.display = 'block';
-      } catch (err) {}
-    } else {
-      try {
-        this.remoteVideoBoxRef.nativeElement.style.display = 'none';
-      } catch (err) {}
-    }
-  }
-
-  handleMyVideoStream() {
-    navigator.mediaDevices
-      .getUserMedia(this.constraints)
-      .then((stream: any) => {
-        this.myVideoStream = stream;
-        this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
-        this.handleVideoAudio();
-      })
-      .catch((err) => {
-        /* handle the error */
-      });
-  }
-
-  handleCameraToggle() {
-    this.myVideoStream.getTracks().forEach((track: any) => {
-      if (track.readyState == 'live' && track.kind === 'video') {
-        track.enabled ? (track.enabled = false) : (track.enabled = true);
-        track.enabled
-          ? (this.videoOption.video = true)
-          : (this.videoOption.video = false);
-      }
-    });
-  }
-
-  handleRemoteCameraToggle() {
-    this.remoteVideoStream.getTracks().forEach((track: any) => {
-      if (track.readyState == 'live' && track.kind === 'video') {
-        track.enabled ? (track.enabled = false) : (track.enabled = true);
-        track.enabled
-          ? (this.remoteVideoOption.video = true)
-          : (this.remoteVideoOption.video = false);
-      }
-    });
-  }
-
-  handleMicToggle() {
-    this.myVideoStream.getTracks().forEach((track: any) => {
-      if (track.readyState == 'live' && track.kind === 'audio') {
-        track.enabled ? (track.enabled = false) : (track.enabled = true);
-        track.enabled
-          ? (this.videoOption.audio = true)
-          : (this.videoOption.audio = false);
-      }
-    });
-  }
-
-  handleRemoteMicToggle() {
-    this.remoteVideoStream.getTracks().forEach((track: any) => {
-      if (track.readyState == 'live' && track.kind === 'audio') {
-        track.enabled ? (track.enabled = false) : (track.enabled = true);
-        track.enabled
-          ? (this.remoteVideoOption.audio = true)
-          : (this.remoteVideoOption.audio = false);
-      }
-    });
   }
 
   handelJoinMeeting() {
     this.communication.joinMeeting(this.userService.user, this.roomId);
   }
 
-  /**
-   * call another peer user using peer id
-   **/
-  handlePeerCall(remotePeerId: string) {
-    navigator.mediaDevices
+  handleCallEnd() {
+    this.communication.disconnectSocket();
+    this.router.navigate(['/']);
+  }
+
+  handleRemoteBoxShow(show: boolean) {
+    try {
+      if (show) this.remoteVideoBoxRef.nativeElement.style.display = 'block';
+      else this.remoteVideoBoxRef.nativeElement.style.display = 'none';
+    } catch (error) {}
+  }
+
+  createCanvsStream(): any {
+    var imageElt = this.renderer.createElement('img');
+    imageElt.src = this.userService.user.photoUrl;
+
+    var canvasElt = this.renderer.createElement('canvas');
+    var ctx = canvasElt.getContext('2d');
+    ctx.drawImage(imageElt, 100, 100);
+
+    var stream = canvasElt.captureStream(10);
+    this.myVideoStream = stream;
+    this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
+    this.handleVideoAudio();
+  }
+
+  async createCamStream(): Promise<any> {
+    await navigator.mediaDevices
       .getUserMedia(this.constraints)
       .then((stream: any) => {
         this.myVideoStream = stream;
         this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
-
         this.handleVideoAudio();
-
-        var call = this.communication.peer.call(remotePeerId, stream);
-        call.on('stream', (remoteStream: any) => {
-          this.remoteVideoStream = remoteStream;
-          this.remoteVideoRef.nativeElement.srcObject = this.remoteVideoStream;
-          this.remoteVideoRef.nativeElement.play();
-          this.handleRemoteBoxShow(true);
-        });
       })
       .catch((err) => {
-        console.log('error on call ', err);
+        this.createCanvsStream();
       });
   }
 
-  /**
-   * Answer call if Any Call is comming
-   **/
-  handlePeerAnswer() {
-    this.communication.peer.on('call', (call) => {
-      navigator.mediaDevices
-        .getUserMedia(this.constraints)
-        .then((stream: any) => {
-          this.myVideoStream = stream;
-          this.myVideoRef.nativeElement.srcObject = this.myVideoStream;
-
-          this.handleVideoAudio();
-
-          call.answer(stream);
-          call.on('stream', (remoteStream) => {
-            this.remoteVideoStream = remoteStream;
-            this.remoteVideoRef.nativeElement.srcObject =
-              this.remoteVideoStream;
-            this.remoteVideoRef.nativeElement.play();
-            this.handleRemoteBoxShow(true);
-          });
-
-          this.handleAnyChangedEvent(this.codeModel);
-        })
-        .catch((err) => {
-          console.log('error on ans ', err);
-        });
-    });
+  createRemoteCamStream(remoteStream: any) {
+    this.remoteVideoStream = remoteStream;
+    this.remoteVideoRef.nativeElement.srcObject = this.remoteVideoStream;
+    this.remoteVideoRef.nativeElement.play();
+    this.handleRemoteBoxShow(true);
   }
 
   /**
    * Handle Video Audio Check User Video Mic Status
    **/
   handleVideoAudio() {
-    if (!this.videoOption.video) {
-      this.handleCameraToggle();
+    if (!this.myVideoOption.video) {
+      this.videoStreamToggle(this.myVideoStream, this.myVideoOption);
     }
 
-    if (!this.videoOption.audio) {
-      this.handleMicToggle();
+    if (!this.myVideoOption.audio) {
+      this.audioStreamToggle(this.myVideoStream, this.myVideoOption);
     }
+  }
+
+  videoStreamToggle(videoStream: any, videoOption: any) {
+    videoStream.getTracks().forEach((track: any) => {
+      if (track.readyState == 'live' && track.kind === 'video') {
+        track.enabled ? (track.enabled = false) : (track.enabled = true);
+        track.enabled
+          ? (videoOption.video = true)
+          : (videoOption.video = false);
+      }
+    });
+  }
+
+  audioStreamToggle(videoStream: any, videoOption: any) {
+    videoStream.getTracks().forEach((track: any) => {
+      if (track.readyState == 'live' && track.kind === 'audio') {
+        track.enabled ? (track.enabled = false) : (track.enabled = true);
+        track.enabled
+          ? (videoOption.audio = true)
+          : (videoOption.audio = false);
+      }
+    });
+  }
+
+  /**
+   * call another peer user using peer id
+   **/
+  async handlePeerCall(remotePeerId: string) {
+    await this.createCamStream();
+    var call = this.communication.peer.call(remotePeerId, this.myVideoStream);
+    call.on('stream', (remoteStream: any) => {
+      this.createRemoteCamStream(remoteStream);
+    });
+  }
+
+  /**
+   * Answer call if Any Call is comming
+   **/
+  async handlePeerAnswer() {
+    await this.createCamStream();
+    this.communication.peer.on('call', (call) => {
+      call.answer(this.myVideoStream);
+      call.on('stream', (remoteStream: any) => {
+        this.createRemoteCamStream(remoteStream);
+      });
+
+      this.handleAnyCodeEditorChangedEvent(this.codeModel);
+    });
   }
 
   /**
    * If any changed in code editor its emit socket
    **/
-  handleAnyChangedEvent(code: any) {
+  handleAnyCodeEditorChangedEvent(code: any) {
+    if (code == this.newCode) return;
+
     this.communication.socket.emit('code-change', {
       code: code,
       roomId: this.roomId,
     });
   }
 
+  /**
+   * Send Message
+   **/
   handleSendMessage(messageBox: any) {
     if (messageBox.value == '') return;
 
@@ -334,5 +357,9 @@ export class RoomPageComponent implements OnInit {
       room: this.roomId,
     });
     messageBox.value = '';
+  }
+
+  ngOnDestroy() {
+    this.communication.disconnectSocket();
   }
 }

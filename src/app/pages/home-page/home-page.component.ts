@@ -29,9 +29,17 @@ export class HomePageComponent {
   ngOnInit() {
     this.user = this.userService.user;
 
+    this.communication.disconnectSocket();
+    this.communication.connectSocket();
+
     this.communication.socket.on('joined-room', ({ roomId }) => {
       this.router.navigate([`/${roomId}`]);
     });
+  }
+
+  handleLogout(){
+    this.userService.removeUser();
+    window.location.reload();
   }
 
   handleShowJoinBtn(value: boolean) {
@@ -42,14 +50,17 @@ export class HomePageComponent {
     if (!this.userService.user) {
       console.warn('login need');
       return;
-    };
-    this.communication.createRoom();
+    }
+
+    this.communication.socket.emit('create-room');
   }
   handleJoinRoom(roomId: any) {
     if (!this.userService.user) {
       console.warn('login need');
       return;
-    };
-    this.router.navigate([`/${roomId.value}`]);
+    }
+
+    var cleansedRoomId = roomId.value.replace(window.location.origin + '/', '');
+    this.router.navigate([`/${cleansedRoomId}`]);
   }
 }

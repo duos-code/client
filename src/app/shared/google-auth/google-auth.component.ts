@@ -1,6 +1,11 @@
 import { SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
-import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  Component,
+  ElementRef,
+  Input,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
 import { UserService } from 'src/app/core/services/user.service';
 
 @Component({
@@ -9,22 +14,17 @@ import { UserService } from 'src/app/core/services/user.service';
   styleUrls: ['./google-auth.component.css'],
 })
 export class GoogleAuthComponent {
+ 
   constructor(
     private userService: UserService,
     private authService: SocialAuthService,
-    private route: ActivatedRoute,
-    private router: Router
   ) {}
+
 
   ngOnInit() {
     this.authService.authState.subscribe((user) => {
       this.userService.setUser(user);
-
       window.location.reload();
-
-      // this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      // this.router.onSameUrlNavigation = 'reload';
-      // this.router.navigate(['./'], { relativeTo: this.route });
     });
   }
 }

@@ -1,7 +1,7 @@
 export const language: Array<string> = [
   'c',
   'cpp',
-  'node',
+  'javascript',
   'java',
   'python',
 ];
